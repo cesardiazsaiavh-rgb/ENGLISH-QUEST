@@ -1,6 +1,17 @@
 <!doctype html>
 <html lang="es">
 <head>
+<script>
+/* Blindaje: si el navegador (o alguna extensión) no trae completo el objeto
+   console, esto evita que la app se caiga por eso. Debe ir de primero,
+   antes que cualquier otro script. */
+(function(){
+  if (typeof window.console === 'undefined') { window.console = {}; }
+  ['log','info','warn','error','debug'].forEach(function(m){
+    if (typeof window.console[m] !== 'function') { window.console[m] = function(){}; }
+  });
+})();
+</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>English Quest 3.8 · Academia Unificada — Academia Unificada · Repertorio 40 · Admin Names v28</title>
@@ -594,7 +605,7 @@ function auditIntegrity(){
  check('Conversation nodes',CONV.every(d=>d.nodes&&Object.values(d.nodes).every(n=>Array.isArray(n.choices)&&n.choices.length>=3)),'nodo sin opciones suficientes');
  check('Boss',Array.isArray(itemsAuditBoss())&&itemsAuditBoss().length===32&&['A1','A2','B1','B2'].every(l=>itemsAuditBoss().filter(x=>x.l===l).length===8)&&itemsAuditBoss().every(x=>Array.isArray(x.o)&&x.o.length===4&&x.o.includes(x.a)),'32 preguntas, 8 por nivel y respuesta correcta presente');
  check('Duplicados críticos',new Set(VERBS_38.map(v=>v[0])).size===VERBS_38.length&&new Set(WORDS.map(x=>x[0])).size===WORDS.length&&new Set(PRONUNCIATION_120.map(x=>x.text)).size===PRONUNCIATION_120.length,'hay duplicados en bancos críticos');
- if(issues.length)console.warn('English Quest FINAL BASE audit issues',issues);else console.info('English Quest FINAL BASE audit: OK'); return issues;
+ if(issues.length)console.warn('English Quest FINAL BASE audit issues',issues);else console.log('English Quest FINAL BASE audit: OK'); return issues;
 }
 
 
@@ -619,7 +630,7 @@ function showAuth(){const gate=document.getElementById('authGate');if(gate){gate
 function hideAuth(){const gate=document.getElementById('authGate');if(gate){gate.classList.add('hide');gate.setAttribute('aria-hidden','true')}document.body.classList.remove('splash-open')}
 function afterAuth(){hideAuth();try{localStorage.setItem('englishQuestSplashSeenV38','1')}catch(e){};p=load();init();showMode('menu');updateUserChrome()}
 function updateUserChrome(){const s=getAuthSession();document.querySelectorAll('.profileBtn').forEach(b=>{const span=b.querySelector('span');if(span)span.textContent=s?(s.role==='admin'?'Administrador · Perfil':`${s.name} · ${s.username}`):'Perfil';b.setAttribute('title',s?(s.role==='admin'?'Administrador':s.name):'Perfil')});const title=document.querySelector('.brandTitle');if(title&&s)title.setAttribute('aria-label',`Sesión de ${s.name} · ${s.username}`)}
-async function submitAuth(){const username=(document.getElementById('authUser')?.value||'').trim().toUpperCase();const pass=document.getElementById('authPass')?.value||'';const passHash=pass?await sha256Hex(pass):'';if(username==='ADMIN'){if(passHash===ADMIN_ACCOUNT.passwordHash){setAuthSession(ADMIN_ACCOUNT);setAuthMsg('Acceso administrador correcto.');setTimeout(showAdmin,120);return}setAuthMsg('Clave de administrador incorrecta.',true);return}if(!/^EQ-\d{3}$/.test(username)){setAuthMsg('Código no válido. Usa un código como EQ-001.',true);return}const user=getAuthUsers().find(u=>u.username===username&&u.passwordHash===passHash);if(!user){setAuthMsg('Código o clave incorrectos. Revisa los datos entregados por tu profesor.',true);return}setAuthSession(user);setAuthMsg('Acceso correcto. Cargando tu progreso…');setTimeout(afterAuth,180)}
+async function submitAuth(){const username=(document.getElementById('authUser')?.value||'').trim().toUpperCase();const pass=(document.getElementById('authPass')?.value||'').trim();const passHash=pass?await sha256Hex(pass):'';if(username==='ADMIN'){if(passHash===ADMIN_ACCOUNT.passwordHash){setAuthSession(ADMIN_ACCOUNT);setAuthMsg('Acceso administrador correcto.');setTimeout(showAdmin,120);return}setAuthMsg('Clave de administrador incorrecta.',true);return}if(!/^EQ-\d{3}$/.test(username)){setAuthMsg('Código no válido. Usa un código como EQ-001.',true);return}const user=getAuthUsers().find(u=>u.username===username&&u.passwordHash===passHash);if(!user){setAuthMsg('Código o clave incorrectos. Revisa los datos entregados por tu profesor.',true);return}setAuthSession(user);setAuthMsg('Acceso correcto. Cargando tu progreso…');setTimeout(afterAuth,180)}
 function continueGuest(){clearAuthSession();hideAuth();p=load();init();showMode('menu');updateUserChrome()}
 function logoutUser(){if(confirm('¿Quieres cerrar la sesión?')){clearAuthSession();location.reload()}}
 function startAcademy(){const splash=document.getElementById('academySplash');if(splash){splash.classList.add('hideSplash');document.body.classList.remove('splash-open');setTimeout(()=>splash.remove(),500)}const session=getAuthSession();if(session){afterAuth()}else{showAuth()}}
@@ -2112,7 +2123,7 @@ function startA1World05Boss(){let i=0,score=0,answered=false;const el=document.g
   // ---------------------------------------------------------
   window.submitAuth = async function(){
     var username = (document.getElementById('authUser')?.value || '').trim().toUpperCase();
-    var pass = document.getElementById('authPass')?.value || '';
+    var pass = (document.getElementById('authPass')?.value || '').trim();
     if (!username) { setAuthMsg('Escribe tu código de estudiante o ADMIN.', true); return; }
     if (!pass) { setAuthMsg('Escribe tu clave.', true); return; }
 
